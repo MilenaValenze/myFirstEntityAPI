@@ -17,14 +17,37 @@ namespace PrimeiraAPI.Controllers
         }
 
         [HttpPost]
-        public IActionResult Add(EmployeeViewModel employeeView)
+        public IActionResult Add([FromForm] EmployeeViewModel employeeView)
         {
-            var employee = new Employee(employeeView.Name, employeeView.BirthYear, null);
+            
+            var filePath = Path.Combine("Storage", employeeView.Photo.FileName);
+
+            using Stream fileStream = new FileStream(filePath, FileMode.Create);
+            employeeView.Photo.CopyTo(fileStream);
+
+            var employee = new Employee(employeeView.Name, employeeView.BirthYear, filePath);
 
             _employeeRepository.Add(employee);
 
             return Ok();
         }
+
+        [HttpPost]
+        [Route("{id}/download")]
+        public IActionResult DownloadPhoto(int id)
+        {
+            var employee = _employeeRepository.Get(id);
+
+            var dataBytes = System.IO.File.ReadAllBytes(employee.photo);
+
+            if (employee == null)
+            {
+                return NotFound();
+            }
+            
+            return File(dataBytes, "image/png");
+        }
+
 
         [HttpGet]
         public IActionResult Get()

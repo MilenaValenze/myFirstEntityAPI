@@ -6,6 +6,8 @@
         public int Age { get; set; }
 
         public int BirthYear { get; set; }
+
+        public IFormFile Photo { get; set; }
     }
 
 }
